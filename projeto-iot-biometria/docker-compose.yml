@@ -1,0 +1,23 @@
+services:
+  # Node-RED Container
+  node-red:
+    build: . # Tells Docker Compose to build the Dockerfile in this directory
+    image: nodered-custom
+    container_name: nodered_app
+    restart: unless-stopped
+    ports:
+      - "1880:1880" 
+    volumes:
+      - nodered_data:/data # Still used to persist your flows and settings
+      - ./ca-cert.pem:/data/certs/ca-cert.pem:ro # Mount certificate for MQTT TLS
+    networks:
+      - nodered_net
+
+# Define the networks
+networks:
+  nodered_net:
+    driver: bridge
+
+# Define the persistent volumes
+volumes:
+  nodered_data:

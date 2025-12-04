@@ -1,0 +1,826 @@
+[
+    {
+        "id": "bb888a98c133cd1e",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "cd868a465b0ad60d",
+        "type": "group",
+        "z": "bb888a98c133cd1e",
+        "name": "Validação de Acesso (RFID)",
+        "nodes": [
+            "d04fd7f257ca86dd",
+            "18e01a1915246df2",
+            "80915a88530f33f3",
+            "a493e61abd817dc9",
+            "03f53dedec4685a8",
+            "de2952417c1a3674",
+            "3732786261253885",
+            "5b92ad4c98a91ac4",
+            "cbd2eb396a24a99b",
+            "3542f3d1c354163e",
+            "cb0ed2f0f9266aca"
+        ],
+        "x": 264,
+        "y": 184,
+        "w": 100,
+        "h": 30
+    },
+    {
+        "id": "33fad9632d16c948",
+        "type": "group",
+        "z": "bb888a98c133cd1e",
+        "name": "Registro de Ponto",
+        "nodes": [
+            "44991579d08fb793",
+            "40e14a83667cc5bd",
+            "56ef4a8b6f47b07a",
+            "e5e0c1917c089937",
+            "456ddd7a2889c260",
+            "ca51fcf3c70e6f32"
+        ],
+        "x": 264,
+        "y": 444,
+        "w": 100,
+        "h": 30
+    },
+    {
+        "id": "bbb0135b8b40f87c",
+        "type": "group",
+        "z": "bb888a98c133cd1e",
+        "name": "Cadastro de Funcionário (API)",
+        "nodes": [
+            "13ce73ad7703ef65",
+            "10a3af1802905d75",
+            "77aa4fd807802e58",
+            "dcddf67170572f7a"
+        ],
+        "x": 94,
+        "y": 619,
+        "w": 1142,
+        "h": 141
+    },
+    {
+        "id": "82b188f5e0a98cbf",
+        "type": "group",
+        "z": "bb888a98c133cd1e",
+        "name": "Cadastro de Funcionário (MQTT/ESP32)",
+        "nodes": [
+            "f00bf2a2060c6fc7",
+            "5eef52c3db59cf8b",
+            "1eb6b38a8ec77aa5",
+            "fe76685ac69fa42a",
+            "d823ec5f37aca0c6",
+            "74486ecb74ea0993",
+            "207d42fa18d04a45",
+            "f3f99c8ed2ba539a",
+            "7f72924184f59815",
+            "a2f8f2aee3a64456",
+            "bd931488ec37d3b4",
+            "c8a1c8fd83450f7a"
+        ],
+        "x": 14,
+        "y": 779,
+        "w": 1252,
+        "h": 382
+    },
+    {
+        "id": "d04fd7f257ca86dd",
+        "type": "mqtt in",
+        "z": "bb888a98c133cd1e",
+        "g": "cd868a465b0ad60d",
+        "name": "Recebe UID para validação",
+        "topic": "ponto/rfid/validacao",
+        "qos": "0",
+        "datatype": "json",
+        "broker": "a01466d5c9545841",
+        "nl": false,
+        "rap": false,
+        "inputs": 0,
+        "x": 180,
+        "y": 240,
+        "wires": [
+            [
+                "18e01a1915246df2",
+                "5b92ad4c98a91ac4"
+            ]
+        ]
+    },
+    {
+        "id": "18e01a1915246df2",
+        "type": "function",
+        "z": "bb888a98c133cd1e",
+        "g": "cd868a465b0ad60d",
+        "name": "Prepara Query",
+        "func": "// Extrai o UID\nlet uid = null;\nif (typeof msg.payload === 'object' && msg.payload.uid) {\n    uid = msg.payload.uid;\n} else if (typeof msg.payload === 'string') {\n    try {\n        const parsed = JSON.parse(msg.payload);\n        uid = parsed.uid;\n    } catch(e) {\n        node.error(\"Erro ao fazer parse do JSON: \" + e);\n        return null;\n    }\n}\n\nif (!uid) {\n    node.error(\"UID não encontrado no payload!\");\n    return null;\n}\n\n// Parametrized query com $1 e msg.params\nmsg.params = [ uid ];\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 580,
+        "y": 240,
+        "wires": [
+            [
+                "80915a88530f33f3",
+                "cbd2eb396a24a99b"
+            ]
+        ]
+    },
+    {
+        "id": "80915a88530f33f3",
+        "type": "postgresql",
+        "z": "bb888a98c133cd1e",
+        "g": "cd868a465b0ad60d",
+        "name": "Busca Funcionário",
+        "query": "SELECT id, nome, rfid FROM funcionarios WHERE rfid = $1",
+        "postgreSQLConfig": "postgres_db",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 910,
+        "y": 240,
+        "wires": [
+            [
+                "a493e61abd817dc9",
+                "3542f3d1c354163e"
+            ]
+        ]
+    },
+    {
+        "id": "a493e61abd817dc9",
+        "type": "switch",
+        "z": "bb888a98c133cd1e",
+        "g": "cd868a465b0ad60d",
+        "name": "Funcionário encontrado?",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "nempty"
+            },
+            {
+                "t": "empty"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 470,
+        "y": 360,
+        "wires": [
+            [
+                "03f53dedec4685a8"
+            ],
+            [
+                "de2952417c1a3674"
+            ]
+        ]
+    },
+    {
+        "id": "03f53dedec4685a8",
+        "type": "function",
+        "z": "bb888a98c133cd1e",
+        "g": "cd868a465b0ad60d",
+        "name": "Resposta: VÁLIDO",
+        "func": "const funcionario = msg.payload[0];\nmsg.payload = {\n    valido: true,\n    nome: funcionario.nome,\n    id: funcionario.id\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 870,
+        "y": 320,
+        "wires": [
+            [
+                "3732786261253885",
+                "cb0ed2f0f9266aca"
+            ]
+        ]
+    },
+    {
+        "id": "de2952417c1a3674",
+        "type": "function",
+        "z": "bb888a98c133cd1e",
+        "g": "cd868a465b0ad60d",
+        "name": "Resposta: INVÁLIDO",
+        "func": "msg.payload = {\n    valido: false\n};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 880,
+        "y": 380,
+        "wires": [
+            [
+                "3732786261253885"
+            ]
+        ]
+    },
+    {
+        "id": "3732786261253885",
+        "type": "mqtt out",
+        "z": "bb888a98c133cd1e",
+        "g": "cd868a465b0ad60d",
+        "name": "Envia resposta",
+        "topic": "ponto/rfid/resposta",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "mqtt_broker",
+        "x": 1180,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "44991579d08fb793",
+        "type": "mqtt in",
+        "z": "bb888a98c133cd1e",
+        "g": "33fad9632d16c948",
+        "name": "Recebe registro de ponto",
+        "topic": "ponto/registro",
+        "qos": "2",
+        "datatype": "json",
+        "broker": "mqtt_broker",
+        "nl": false,
+        "rap": false,
+        "inputs": 0,
+        "x": 190,
+        "y": 500,
+        "wires": [
+            [
+                "40e14a83667cc5bd",
+                "456ddd7a2889c260"
+            ]
+        ]
+    },
+    {
+        "id": "40e14a83667cc5bd",
+        "type": "function",
+        "z": "bb888a98c133cd1e",
+        "g": "33fad9632d16c948",
+        "name": "Prepara Insert",
+        "func": "msg.params = [\n    msg.payload.funcionario_id,\n    msg.payload.tipo,\n    msg.payload.metodo,\n    msg.payload.timestamp\n];\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 620,
+        "y": 500,
+        "wires": [
+            [
+                "56ef4a8b6f47b07a",
+                "ca51fcf3c70e6f32"
+            ]
+        ]
+    },
+    {
+        "id": "56ef4a8b6f47b07a",
+        "type": "postgresql",
+        "z": "bb888a98c133cd1e",
+        "g": "33fad9632d16c948",
+        "name": "Salva Registro",
+        "query": "INSERT INTO registros_ponto(funcionario_id, tipo, metodo, data_hora) VALUES($1, $2, $3, to_timestamp($4))",
+        "postgreSQLConfig": "postgres_db",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 880,
+        "y": 540,
+        "wires": [
+            [
+                "e5e0c1917c089937"
+            ]
+        ]
+    },
+    {
+        "id": "e5e0c1917c089937",
+        "type": "debug",
+        "z": "bb888a98c133cd1e",
+        "g": "33fad9632d16c948",
+        "name": "Log Registro",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 1110,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "5b92ad4c98a91ac4",
+        "type": "debug",
+        "z": "bb888a98c133cd1e",
+        "g": "cd868a465b0ad60d",
+        "name": "🔍 MQTT Recebido",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 520,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "cbd2eb396a24a99b",
+        "type": "debug",
+        "z": "bb888a98c133cd1e",
+        "g": "cd868a465b0ad60d",
+        "name": "🔍 Query Preparada",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 880,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "3542f3d1c354163e",
+        "type": "debug",
+        "z": "bb888a98c133cd1e",
+        "g": "cd868a465b0ad60d",
+        "name": "🔍 Resultado DB",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 1190,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "cb0ed2f0f9266aca",
+        "type": "debug",
+        "z": "bb888a98c133cd1e",
+        "g": "cd868a465b0ad60d",
+        "name": "🔍 Resposta Final",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 1170,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "456ddd7a2889c260",
+        "type": "debug",
+        "z": "bb888a98c133cd1e",
+        "g": "33fad9632d16c948",
+        "name": "🔍 Registro Recebido",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 500,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "ca51fcf3c70e6f32",
+        "type": "debug",
+        "z": "bb888a98c133cd1e",
+        "g": "33fad9632d16c948",
+        "name": "🔍 Insert Preparado",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 900,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "f00bf2a2060c6fc7",
+        "type": "mqtt in",
+        "z": "bb888a98c133cd1e",
+        "g": "82b188f5e0a98cbf",
+        "name": "Recebe TAG para cadastro",
+        "topic": "ponto/cadastro/registrar",
+        "qos": "2",
+        "datatype": "json",
+        "broker": "mqtt_broker",
+        "nl": false,
+        "rap": false,
+        "inputs": 0,
+        "x": 150,
+        "y": 860,
+        "wires": [
+            [
+                "5eef52c3db59cf8b",
+                "a2f8f2aee3a64456"
+            ]
+        ]
+    },
+    {
+        "id": "5eef52c3db59cf8b",
+        "type": "function",
+        "z": "bb888a98c133cd1e",
+        "g": "82b188f5e0a98cbf",
+        "name": "Verifica se UID existe",
+        "func": "// Extrai o UID\nlet uid = null;\n\nif (typeof msg.payload === 'string') {\n    try {\n        const parsed = JSON.parse(msg.payload);\n        uid = parsed.uid;\n    } catch(e) {\n        uid = msg.payload;\n    }\n} else if (typeof msg.payload === 'object' && msg.payload !== null) {\n    uid = msg.payload.uid;\n}\n\nif (!uid) {\n    node.error(\"UID não encontrado! Payload: \" + JSON.stringify(msg.payload), msg);\n    return null;\n}\n\nmsg.req_uid = uid;\nmsg.params = [ uid ];\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 480,
+        "y": 860,
+        "wires": [
+            [
+                "1eb6b38a8ec77aa5",
+                "bd931488ec37d3b4"
+            ]
+        ]
+    },
+    {
+        "id": "1eb6b38a8ec77aa5",
+        "type": "postgresql",
+        "z": "bb888a98c133cd1e",
+        "g": "82b188f5e0a98cbf",
+        "name": "Busca UID",
+        "query": "SELECT id, nome, rfid FROM funcionarios WHERE rfid = $1",
+        "postgreSQLConfig": "postgres_db",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 970,
+        "y": 860,
+        "wires": [
+            [
+                "fe76685ac69fa42a"
+            ]
+        ]
+    },
+    {
+        "id": "fe76685ac69fa42a",
+        "type": "switch",
+        "z": "bb888a98c133cd1e",
+        "g": "82b188f5e0a98cbf",
+        "name": "UID já existe?",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "empty"
+            },
+            {
+                "t": "nempty"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 440,
+        "y": 960,
+        "wires": [
+            [
+                "d823ec5f37aca0c6"
+            ],
+            [
+                "207d42fa18d04a45"
+            ]
+        ]
+    },
+    {
+        "id": "d823ec5f37aca0c6",
+        "type": "function",
+        "z": "bb888a98c133cd1e",
+        "g": "82b188f5e0a98cbf",
+        "name": "Gera nome automático",
+        "func": "// Recupera o UID do campo customizado\nconst uid = msg.req_uid;\n\nif (!uid) {\n    node.error(\"req_uid não encontrado! UID foi perdido.\", msg);\n    return null;\n}\n\n// Gera nome no formato \"Novo Func X\"\nconst timestamp = Date.now();\nconst nome = \"Novo Func \" + (timestamp % 10000);\n\nmsg.params = [ nome, uid ];\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 760,
+        "y": 960,
+        "wires": [
+            [
+                "74486ecb74ea0993",
+                "c8a1c8fd83450f7a"
+            ]
+        ]
+    },
+    {
+        "id": "74486ecb74ea0993",
+        "type": "postgresql",
+        "z": "bb888a98c133cd1e",
+        "g": "82b188f5e0a98cbf",
+        "name": "Insere Funcionário",
+        "query": "INSERT INTO funcionarios(nome, rfid) VALUES($1, $2) RETURNING id, nome, rfid",
+        "postgreSQLConfig": "postgres_db",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 1070,
+        "y": 1000,
+        "wires": [
+            [
+                "f3f99c8ed2ba539a"
+            ]
+        ]
+    },
+    {
+        "id": "207d42fa18d04a45",
+        "type": "function",
+        "z": "bb888a98c133cd1e",
+        "g": "82b188f5e0a98cbf",
+        "name": "Resposta: JÁ CADASTRADO",
+        "func": "const funcionario = msg.payload[0];\nmsg.payload = {\n    sucesso: false,\n    mensagem: \"UID já cadastrado\",\n    funcionario: funcionario.nome\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 350,
+        "y": 1120,
+        "wires": [
+            [
+                "f3f99c8ed2ba539a"
+            ]
+        ]
+    },
+    {
+        "id": "f3f99c8ed2ba539a",
+        "type": "function",
+        "z": "bb888a98c133cd1e",
+        "g": "82b188f5e0a98cbf",
+        "name": "Formata resposta SUCESSO",
+        "func": "// Se payload é array do INSERT, pega primeiro elemento\nif (Array.isArray(msg.payload) && msg.payload.length > 0) {\n    const func = msg.payload[0];\n    msg.payload = {\n        sucesso: true,\n        uid: func.rfid,\n        nome: func.nome,\n        id: func.id\n    };\n}\n// Se já é objeto (erro), mantém\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 700,
+        "y": 1120,
+        "wires": [
+            [
+                "7f72924184f59815"
+            ]
+        ]
+    },
+    {
+        "id": "7f72924184f59815",
+        "type": "mqtt out",
+        "z": "bb888a98c133cd1e",
+        "g": "82b188f5e0a98cbf",
+        "name": "Envia resposta cadastro",
+        "topic": "ponto/cadastro/resposta",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "mqtt_broker",
+        "x": 1050,
+        "y": 1120,
+        "wires": []
+    },
+    {
+        "id": "a2f8f2aee3a64456",
+        "type": "debug",
+        "z": "bb888a98c133cd1e",
+        "g": "82b188f5e0a98cbf",
+        "name": "🔍 TAG Recebida",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 450,
+        "y": 820,
+        "wires": []
+    },
+    {
+        "id": "bd931488ec37d3b4",
+        "type": "debug",
+        "z": "bb888a98c133cd1e",
+        "g": "82b188f5e0a98cbf",
+        "name": "🔍 Query Verifica",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 1010,
+        "y": 820,
+        "wires": []
+    },
+    {
+        "id": "c8a1c8fd83450f7a",
+        "type": "debug",
+        "z": "bb888a98c133cd1e",
+        "g": "82b188f5e0a98cbf",
+        "name": "🔍 Insert Novo Func",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 1120,
+        "y": 940,
+        "wires": []
+    },
+    {
+        "id": "13ce73ad7703ef65",
+        "type": "postgresql",
+        "z": "bb888a98c133cd1e",
+        "g": "bbb0135b8b40f87c",
+        "name": "Busca Funcionário",
+        "query": "SELECT id, nome FROM funcionarios WHERE id = $1",
+        "postgreSQLConfig": "postgres_db",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 470,
+        "y": 680,
+        "wires": [
+            [
+                "dcddf67170572f7a"
+            ]
+        ]
+    },
+    {
+        "id": "10a3af1802905d75",
+        "type": "mqtt in",
+        "z": "bb888a98c133cd1e",
+        "g": "bbb0135b8b40f87c",
+        "name": "Recebe id para obter nome",
+        "topic": "ponto/biometria/busca",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "a01466d5c9545841",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 230,
+        "y": 680,
+        "wires": [
+            [
+                "13ce73ad7703ef65"
+            ]
+        ]
+    },
+    {
+        "id": "77aa4fd807802e58",
+        "type": "mqtt out",
+        "z": "bb888a98c133cd1e",
+        "g": "bbb0135b8b40f87c",
+        "name": "Retorna funcionario",
+        "topic": "ponto/biometria/resposta",
+        "qos": "0",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "a01466d5c9545841",
+        "x": 910,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "dcddf67170572f7a",
+        "type": "function",
+        "z": "bb888a98c133cd1e",
+        "g": "bbb0135b8b40f87c",
+        "name": "Resposta: VÁLIDO",
+        "func": "const funcionario = msg.payload[0];\nmsg.payload = {\n    valido: true,\n    nome: funcionario.nome,\n    id: funcionario.id\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 690,
+        "y": 680,
+        "wires": [
+            [
+                "77aa4fd807802e58"
+            ]
+        ]
+    },
+    {
+        "id": "a01466d5c9545841",
+        "type": "mqtt-broker",
+        "name": "IoT",
+        "broker": "mqtt.janks.dev.br",
+        "port": "8883",
+        "tls": "",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": true,
+        "protocolVersion": "5",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "postgres_db",
+        "type": "postgreSQLConfig",
+        "name": "PontoEletronicoDB",
+        "host": "postgresql.janks.dev.br",
+        "hostFieldType": "str",
+        "port": "5432",
+        "portFieldType": "num",
+        "database": "projeto",
+        "databaseFieldType": "str",
+        "ssl": "true",
+        "sslFieldType": "bool",
+        "applicationName": "",
+        "applicationNameType": "str",
+        "max": "10",
+        "maxFieldType": "num",
+        "idle": "1000",
+        "idleFieldType": "num",
+        "connectionTimeout": "10000",
+        "connectionTimeoutFieldType": "num",
+        "user": "iot",
+        "userFieldType": "str",
+        "password": "pepcon-garton",
+        "passwordFieldType": "str"
+    },
+    {
+        "id": "mqtt_broker",
+        "type": "mqtt-broker",
+        "name": "MQTT janks.dev.br",
+        "broker": "mqtt.janks.dev.br",
+        "port": "1883",
+        "tls": "",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "5",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    }
+]
