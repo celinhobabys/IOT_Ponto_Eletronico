@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>{{ titulo }}</title>
+  <link rel="stylesheet" href="{% static 'painel_admin/css/style.css' %}">
+</head>
+<body class="form-page">
+  <div class="form-center">
+    <h1>{{ titulo }}</h1>
+    <form method="post" class="form-box">
+      {% csrf_token %}
+      <div class="form-row">
+        {{ form.nome.label_tag }}
+        {{ form.nome }}
+        {% if form.nome.errors %}<div class="form-error">{{ form.nome.errors }}</div>{% endif %}
+      </div>
+      <div class="form-row">
+        {{ form.name.label_tag }}      <!-- nome → name -->
+        {{ form.name }}                <!-- nome → name -->
+        {% if form.name.errors %}<div class="form-error">{{ form.name.errors }}</div>{% endif %}
+      </div>
+      <button type="submit" class="submit-btn">{{ botao }}</button>
+      <a href="{% url 'painel_admin:home' %}" class="cancel-link">Cancelar</a>
+    </form>
+  </div>
+</body>
+</html>

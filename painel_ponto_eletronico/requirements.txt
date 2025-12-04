@@ -1,0 +1,4 @@
+django
+psycopg[binary]
+paho-mqtt
+python-dotenv

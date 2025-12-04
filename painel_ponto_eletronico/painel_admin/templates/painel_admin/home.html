@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Painel Admin</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'painel_admin/css/style.css' %}">
+</head>
+<body>
+  <!-- canto superior esquerdo -->
+  <div class="header-actions">
+    <form method="get" action="{% url 'painel_admin:home' %}">
+      <input type="text"
+             class="search-box"
+             name="q"
+             placeholder="Buscar funcionário..."
+             value="{{ q|default:'' }}">
+    </form>
+  
+    <a href="{% url 'painel_admin:funcionario_create' %}" class="add-user-btn">+ Adicionar</a>
+  
+    <form class="logout-form" method="post" action="{% url 'logout' %}">
+      {% csrf_token %}
+      <button type="submit" class="logout-btn">Sair</button>
+    </form>
+  </div>
+
+  <div class="page">
+    <h1>Bem-vindo ao Painel Admin!</h1>
+    
+    {% if messages %}
+    <div class="messages">
+      {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="table-container">
+      <table class="user-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Atualizar</th>
+            <th>Excluir</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for f in funcionarios %}
+          <tr>
+            <td>{{ f.user_id }}</td>  <!-- id → user_id -->
+            <td>{{ f.name }}</td>      <!-- nome → name -->
+            <td><a class="icon-btn" title="Editar" href="{% url 'painel_admin:funcionario_update' f.pk %}">&#x21bb;</a></td>
+            <td>
+              <a class="icon-btn" title="Excluir" href="{% url 'painel_admin:funcionario_delete' f.pk %}">&#10060;</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5">Nenhum funcionário cadastrado.</td></tr>
+          {% endfor %}
+        </tbody>
+        
+      </table>
+    </div>
+  </div>
+</body>
+</html>
