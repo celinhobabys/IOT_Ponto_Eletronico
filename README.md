@@ -2,6 +2,8 @@
 
 O trabalho apresenta um sistema de ponto eletrônico inteligente, suportado por tecnologias de IoT. A solução integra métodos de autenticação via biometria e RFID para validar usuários. O objetivo é entregar um dispositivo totalmente conectado aos sistema geral, que não apenas registre o fluxo de entrada e saída dos colaboradores, mas também disponibilize esses dados para monitoramento e análise.
 
+---
+
 ### Modos de Operação
 
 **MODO OFFLINE (sem WiFi/MQTT):**
@@ -36,6 +38,8 @@ O trabalho apresenta um sistema de ponto eletrônico inteligente, suportado por 
 - **Node-RED** - Processamento de fluxos
 - **PostgreSQL** - Banco de dados
 - **Django** - Backend do painel web
+
+---
 
 ## Como Funciona
 
