@@ -2,25 +2,6 @@
 
 O trabalho apresenta um sistema de ponto eletrônico inteligente, suportado por tecnologias de IoT. A solução integra métodos de autenticação via biometria e RFID para validar usuários. O objetivo é entregar um dispositivo totalmente conectado aos sistema geral, que não apenas registre o fluxo de entrada e saída dos colaboradores, mas também disponibilize esses dados para monitoramento e análise.
 
-## Documentação
-
-### Para começar:
-**[META1_GUIA_TESTE.md](META1_GUIA_TESTE.md)** - Guia passo a passo com roteiro de testes
-
-### Para entender o código:
-**[META1_DOCUMENTACAO.md](META1_DOCUMENTACAO.md)** - Arquitetura, fluxos e detalhes técnicos
-
-### Para resolver problemas:
-**[META1_QUICK_REF.md](META1_QUICK_REF.md)** - Troubleshooting e referência rápida
-
-### Para o projeto completo:
-**[projeto.md](projeto.md)** - Roadmap das 8 fases do projeto
-
-### Para consultar códigos:
-**[resumo.md](resumo.md)** - Exemplos de Arduino/ESP32
-
----
-
 ### Modos de Operação
 
 **MODO OFFLINE (sem WiFi/MQTT):**
